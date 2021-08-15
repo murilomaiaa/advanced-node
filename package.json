@@ -4,9 +4,22 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "rimraf dist && tsc",
+    "start": "node dist/main/api"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "author": "Murilo Maia",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/module-alias": "2.0.1",
+    "@types/node": "16.6.1",
+    "typescript": "4.3.5"
+  },
+  "engines": {
+    "node": "14.x"
+  },
+  "dependencies": {
+    "module-alias": "2.2.2",
+    "rimraf": "3.0.2"
+  }
 }
