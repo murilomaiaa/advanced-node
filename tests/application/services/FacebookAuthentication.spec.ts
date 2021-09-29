@@ -1,7 +1,7 @@
 import { mocked } from 'ts-jest/utils'
 import { mock, MockProxy } from 'jest-mock-extended'
 
-import { LoadFacebookUserApi, SaveFacebookAccountRepository, LoadUserAccountRepository } from '@/application/protocols'
+import { LoadFacebookUserApi, SaveFacebookAccountRepository, LoadUserAccountRepository, TokenGenerator } from '@/application/protocols'
 import { FacebookAuthenticationService } from '@/application/services'
 import { AuthenticationError } from '@/domain/errors'
 import { FacebookAccount } from '@/domain/models'
@@ -10,6 +10,7 @@ jest.mock('@/domain/models/FacebookAccount')
 
 describe('FacebookAuthenticationService', () => {
   let facebookApi: MockProxy<LoadFacebookUserApi>
+  let crypto: MockProxy<TokenGenerator>
   let userAccountRepo: MockProxy<LoadUserAccountRepository & SaveFacebookAccountRepository>
   let sut: FacebookAuthenticationService
   const token = 'any_token'
@@ -17,6 +18,7 @@ describe('FacebookAuthenticationService', () => {
 
   beforeEach(() => {
     facebookApi = mock()
+    crypto = mock()
     facebookApi.loadUser.mockResolvedValue({
       name: 'any_fb_name',
       email,
@@ -24,8 +26,9 @@ describe('FacebookAuthenticationService', () => {
     })
     userAccountRepo = mock()
     userAccountRepo.load.mockResolvedValue(undefined)
+    userAccountRepo.saveWithFacebook.mockResolvedValue({ id: 'any_account_id' })
 
-    sut = new FacebookAuthenticationService(facebookApi, userAccountRepo)
+    sut = new FacebookAuthenticationService(facebookApi, userAccountRepo, crypto)
   })
 
   it('should call LoadFacebookUserApi with correct args', async () => {
@@ -58,5 +61,12 @@ describe('FacebookAuthenticationService', () => {
 
     expect(userAccountRepo.saveWithFacebook).toBeCalledWith({ any: 'any' })
     expect(userAccountRepo.saveWithFacebook).toBeCalledTimes(1)
+  })
+
+  it('should call TokenGenerator with correct params', async () => {
+    await sut.execute({ token })
+
+    expect(crypto.generateToken).toBeCalledWith({ key: 'any_account_id' })
+    expect(crypto.generateToken).toBeCalledTimes(1)
   })
 })
