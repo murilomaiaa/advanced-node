@@ -15,6 +15,8 @@ describe('FacebookApi', () => {
   })
 
   beforeEach(() => {
+    httpClient.get.mockResolvedValueOnce({ access_token: 'any_app_token' })
+
     sut = new FacebookApi(httpClient, clientId, clientSecret)
   })
 
@@ -27,6 +29,18 @@ describe('FacebookApi', () => {
         client_id: clientId,
         client_secret: clientSecret,
         grant_type: 'client_credentials'
+      }
+    })
+  })
+
+  it('should get debug token', async () => {
+    await sut.loadUser({ token: 'any_client_token' })
+
+    expect(httpClient.get).toBeCalledWith({
+      url: 'https://graph.facebool.com/debug_token',
+      params: {
+        access_token: 'any_app_token',
+        input_token: 'any_client_token'
       }
     })
   })
