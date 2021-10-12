@@ -5,7 +5,9 @@ type GetAccessToken = { access_token: string }
 
 type GetDebugToken = { data: { user_id: string } }
 
-export class FacebookApi {
+type GetUserInfo = { id: string, name: string, email: string }
+
+export class FacebookApi implements LoadFacebookUserApi {
   private readonly baseUrl = 'https://graph.facebool.com'
   constructor(
     private readonly httpClient: HttpGetClient,
@@ -13,7 +15,7 @@ export class FacebookApi {
     private readonly clientSecret: string
   ) {}
 
-  async loadUser(params: LoadFacebookUserApi.Params): Promise<void> {
+  async loadUser(params: LoadFacebookUserApi.Params): Promise<LoadFacebookUserApi.Result> {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { access_token } = await this.httpClient.get<GetAccessToken>({
       url: `${this.baseUrl}/oauth/access_token`,
@@ -32,12 +34,18 @@ export class FacebookApi {
       }
     })
 
-    await this.httpClient.get({
+    const userInfo = await this.httpClient.get<GetUserInfo>({
       url: `${this.baseUrl}/${debugToken.data.user_id}`,
       params: {
         fields: ['id', 'name', 'email'].join(','),
         access_token: params.token
       }
     })
+
+    return {
+      facebookId: userInfo.id,
+      email: userInfo.email,
+      name: userInfo.name
+    }
   }
 }
