@@ -8,6 +8,7 @@
     "@typescript-eslint/no-namespace": "off",
     "@typescript-eslint/no-invalid-void-type": "off",
     "space-before-function-paren": "off",
+    "@typescript-eslint/return-await":"off",
     "@typescript-eslint/space-before-function-paren": "off"
   }
 }
